@@ -30,6 +30,10 @@ def root():
 def list_notes(db: Session = Depends(get_db)):
     return db.query(Note).all()
 
+@app.get("/health")
+def health():
+    return {"ok":True}
+
 @app.post("/notes", status_code=201)
 def create_note(note: noteIn, db: Session = Depends(get_db)):
     n = Note(title = note.title, body = note.body)
