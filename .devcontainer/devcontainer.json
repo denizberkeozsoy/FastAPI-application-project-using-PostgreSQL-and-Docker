@@ -1,0 +1,9 @@
+{
+    "name": "docker-fastapi-notes-dev",
+    "dockerComposeFile": ["../compose.dev.yaml"],
+    "service": "api",
+    "workspaceFolder": "/app",
+    "forwardPorts": [8000],
+    "postCreateCommand": "pip install -r app/requirements.txt",
+    "remoteUser": "root"
+}

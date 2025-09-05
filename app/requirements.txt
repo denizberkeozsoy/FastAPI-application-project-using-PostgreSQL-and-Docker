@@ -9,3 +9,5 @@ python-multipart
 alembic
 pytest
 debugpy
+ruff
+black

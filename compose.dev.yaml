@@ -50,23 +50,55 @@ services:
       retries: 10
 
   seed:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     profiles: ["tools"]
-    command: python -c "import app.seed"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - ./app:/app/app:rw
     depends_on:
       db:
         condition: service_healthy
+    # run the actual seed script in your mounted code
+    command: python /app/app/seed.py
+    restart: "no"
 
   test:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     profiles: ["tools"]
-    command: sh -c "pip install -q pytest && pytest -q"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
     volumes:
       - ./app:/app/app:rw
       - ./tests:/app/tests:rw
     depends_on:
       db:
         condition: service_healthy
+    command: sh -c "pip install -q pytest && pytest -q"
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["tools"]
+    working_dir: /app/app               # run Alembic from the mounted app dir
+    environment:
+      - DATABASE_URL=${DATABASE_URL}    # Alembic/env.py can read this
+    volumes:
+      - ./app:/app/app:rw
+    depends_on:
+      db:
+        condition: service_healthy      # <-- must be keyed by service name
+    command: sh -lc "alembic upgrade head"
+    restart: "no"
+
+  lint:
+  # 3) continue
+
 
 volumes:
   pgdata:
