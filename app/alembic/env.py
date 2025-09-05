@@ -3,7 +3,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 from app.db import Base, DATABASE_URL  # <-- import your metadata & URL
-from app.models import Note            # <-- import models so autogenerate sees them
+from app.models import Note  # noqa: F401  (imported for Alembic autogenerate)
 
 config = context.config
 if config.get_main_option("sqlalchemy.url") is None:
@@ -14,6 +14,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+
 def run_migrations_offline():
     context.configure(
         url=DATABASE_URL, target_metadata=target_metadata, literal_binds=True
@@ -21,14 +22,18 @@ def run_migrations_offline():
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online():
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section), prefix="sqlalchemy.", poolclass=pool.NullPool
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

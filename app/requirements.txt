@@ -11,3 +11,4 @@ pytest
 debugpy
 ruff
 black
+httpx

@@ -78,7 +78,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "pip install -q pytest && pytest -q"
+    command: sh -c "pip install -q pytest httpx && pytest -q"
 
   migrate:
     build:
@@ -97,8 +97,16 @@ services:
     restart: "no"
 
   lint:
-  # 3) continue
+    build: .
+    profiles: ["tools"]
+    command: sh -c "pip install -q ruff && ruff check app"
+    volumes: ["./app:/app/app:rw"]
 
+  format:
+    build: .
+    profiles: ["tools"]
+    command: sh -c "pip install -q black && black app"
+    volumes: ["./app:/app/app:rw"]
 
 volumes:
   pgdata:
