@@ -6,16 +6,18 @@ Base.metadata.create_all(bind=engine)
 db = SessionLocal()
 
 try:
-    # Ensure a default user exists
-    user = db.execute(select(User).where(User.email == "demo@local")).scalar_one_or_none()
+    # To ensure a default user exists
+    user = db.execute(
+        select(User).where(User.email == "demo@local")
+    ).scalar_one_or_none()
     if not user:
-        user = User(email="demo@local", hashed_password="demo")  # not for prod
+        user = User(email="demo@local", hashed_password="demo") 
         db.add(user)
         db.commit()
         db.refresh(user)
 
-    # Only seed if empty
-    notes_count = db.query(Note).count()  # <-- FIXED: call the function
+    # Only seed database if it is empty
+    notes_count = db.query(Note).count()  
     if notes_count == 0:
         db.add_all(
             [

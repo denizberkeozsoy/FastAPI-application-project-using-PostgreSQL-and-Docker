@@ -2,11 +2,11 @@ services:
   pgadmin:
     image: dpage/pgadmin4:8
     profiles: ["tools"]
-    ports: ["5050:80"]
+    ports:
+      - "5050:80"
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@local
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com   # <-- valid email
       - PGADMIN_DEFAULT_PASSWORD=admin
-      - PYDEVD_DISABLE_FILE_VALIDATION=1
     depends_on:
       db:
         condition: service_healthy

@@ -1,5 +1,6 @@
 # app/tests/test_health.py
 
+
 def test_root(client):
     r = client.get("/")
     assert r.status_code == 200

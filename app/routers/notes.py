@@ -8,9 +8,11 @@ from app.schemas import NoteCreate, NoteRead, NoteUpdate
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
+
 @router.get("", response_model=List[NoteRead])
 def list_notes(db: Session = Depends(get_db)):
     return db.query(Note).order_by(Note.created_at.desc()).all()
+
 
 @router.post("", response_model=NoteRead, status_code=status.HTTP_201_CREATED)
 def create_note(payload: NoteCreate, db: Session = Depends(get_db)):
@@ -21,12 +23,14 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db)):
     db.refresh(note)
     return note
 
+
 @router.get("/{note_id}", response_model=NoteRead)
 def get_note(note_id: int, db: Session = Depends(get_db)):
     note = db.get(Note, note_id)
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     return note
+
 
 @router.patch("/{note_id}", response_model=NoteRead)
 def update_note(note_id: int, payload: NoteUpdate, db: Session = Depends(get_db)):
@@ -42,6 +46,7 @@ def update_note(note_id: int, payload: NoteUpdate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(note)
     return note
+
 
 @router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_note(note_id: int, db: Session = Depends(get_db)):

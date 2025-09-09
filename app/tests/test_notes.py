@@ -1,5 +1,6 @@
 # app/tests/test_notes.py
 
+
 def test_create_and_list_notes(client):
     # create
     r = client.post("/notes", json={"title": "t1", "body": "b1"})

@@ -25,7 +25,10 @@ class TimestampMixin:
         DateTime(timezone=True), server_default=func.now(), nullable=True
     )
     updated_at: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=True,
     )
 
 
@@ -45,9 +48,7 @@ class User(PKMixin, TimestampMixin, Base):
         lazy="selectin",
     )
 
-    __table_args__ = (
-        Index("ix_users_email", "email"),
-    )
+    __table_args__ = (Index("ix_users_email", "email"),)
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<User id={self.id} email={self.email!r}>"
@@ -70,9 +71,7 @@ class Note(PKMixin, TimestampMixin, Base):
         lazy="selectin",
     )
 
-    __table_args__ = (
-        Index("ix_notes_title", "title"),
-    )
+    __table_args__ = (Index("ix_notes_title", "title"),)
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Note id={self.id} title={self.title!r} user_id={self.user_id}>"
