@@ -12,3 +12,4 @@ debugpy
 ruff
 black
 httpx
+python-dotenv
