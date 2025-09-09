@@ -13,3 +13,4 @@ ruff
 black
 httpx
 python-dotenv
+prometheus-fastapi-instrumentator>=7.0.0

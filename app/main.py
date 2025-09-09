@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .db import Base, engine, SessionLocal
 from .models import Note
@@ -28,6 +29,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Notes API", lifespan=lifespan)
+Instrumentator().instrument(app).expose(app, include_in_schema=False, endpoint="/metrics")
 
 
 @app.get("/")

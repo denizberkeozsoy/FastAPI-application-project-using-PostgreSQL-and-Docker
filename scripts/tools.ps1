@@ -1,1 +1,1 @@
-doscker compose -f compose.dev.yaml --profile tools up --build
+docker compose -f compose.dev.yaml --profile tools up --build
