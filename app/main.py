@@ -346,6 +346,9 @@ def notes_ui():
       <ul id="list"></ul>
 
       <script>
+        // Always talk to the same origin the UI is served from
+        const API = window.location.origin;
+
         let state = { q: '', limit: 20, offset: 0, total: 0 };
 
         function qs(params) {
@@ -353,11 +356,13 @@ def notes_ui():
           if (params.q) sp.set('q', params.q);
           if (params.limit != null) sp.set('limit', params.limit);
           if (params.offset != null) sp.set('offset', params.offset);
+          // cache-buster to avoid any intermediary caching
+          sp.set('_ts', Date.now().toString());
           return sp.toString();
         }
 
         async function load() {
-          const res = await fetch('/notes?' + qs(state));
+          const res = await fetch(`${API}/notes?` + qs(state), { cache: 'no-store' });
           const { items, total, limit, offset } = await res.json();
           state.total = total;
           state.limit = limit;
@@ -397,16 +402,16 @@ def notes_ui():
           e.preventDefault();
           const title = document.getElementById('title').value;
           const body = document.getElementById('body').value;
-          const res = await fetch('/notes', {
+          const res = await fetch(`${API}/notes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            cache: 'no-store',
             body: JSON.stringify({ title, body })
           });
           if (res.ok) {
             document.getElementById('title').value = '';
             document.getElementById('body').value = '';
-            // reload first page to show newest first
-            state.offset = 0;
+            state.offset = 0; // show newest first on reload
             await load();
           } else {
             const text = await res.text();
@@ -425,11 +430,12 @@ def notes_ui():
           if (!id) return;
 
           if (e.target.classList.contains('save')) {
-            const title = document.querySelector(\`input.title[data-id="\${id}"]\`).value;
-            const body = document.querySelector(\`input.body[data-id="\${id}"]\`).value;
-            const r = await fetch(\`/notes/\${id}\`, {
+            const title = document.querySelector(`input.title[data-id="${id}"]`).value;
+            const body = document.querySelector(`input.body[data-id="${id}"]`).value;
+            const r = await fetch(`${API}/notes/${id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
+              cache: 'no-store',
               body: JSON.stringify({ title, body })
             });
             if (!r.ok) {
@@ -440,12 +446,14 @@ def notes_ui():
               } catch {
                 alert('Save failed: ' + t);
               }
+            } else {
+              await load(); // reflect edits immediately
             }
           }
 
           if (e.target.classList.contains('del')) {
             if (!confirm('Delete note #' + id + '?')) return;
-            const r = await fetch(\`/notes/\${id}\`, { method: 'DELETE' });
+            const r = await fetch(`${API}/notes/${id}`, { method: 'DELETE', cache: 'no-store' });
             if (r.ok) {
               // after delete, reload current page (might need to shift offset back if empty)
               if (state.offset >= state.total - 1 && state.offset > 0) {
