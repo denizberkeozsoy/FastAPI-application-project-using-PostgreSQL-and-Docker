@@ -1,17 +1,19 @@
 # app/models.py
 from __future__ import annotations
 
+from datetime import datetime
+from typing import List, Optional
+
 from sqlalchemy import (
-    Column,
     Integer,
     String,
     Text,
     DateTime,
     ForeignKey,
-    func,
     Index,
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
+
 from app.db import Base
 
 
@@ -21,14 +23,11 @@ class PKMixin:
 
 
 class TimestampMixin:
-    created_at: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=True
+    created_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
-    updated_at: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=True,
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
 
 
@@ -36,19 +35,19 @@ class TimestampMixin:
 class User(PKMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
-    email: Mapped[str | None] = mapped_column(
+    email: Mapped[Optional[str]] = mapped_column(
         String(255), unique=True, index=True, nullable=True
     )
-    hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    hashed_password: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
-    notes: Mapped[list["Note"]] = relationship(
+    # relationships
+    notes: Mapped[List["Note"]] = relationship(
         "Note",
         back_populates="owner",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
 
-    __table_args__ = (Index("ix_users_email", "email"),)
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<User id={self.id} email={self.email!r}>"
@@ -58,20 +57,23 @@ class User(PKMixin, TimestampMixin, Base):
 class Note(PKMixin, TimestampMixin, Base):
     __tablename__ = "notes"
 
-    title: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    title: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    user_id: Mapped[int | None] = mapped_column(
+    user_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True
     )
 
-    owner: Mapped[User | None] = relationship(
+    # relationships
+    owner: Mapped[Optional[User]] = relationship(
         "User",
         back_populates="notes",
         lazy="selectin",
     )
 
-    __table_args__ = (Index("ix_notes_title", "title"),)
+    __table_args__ = (
+        Index("ix_notes_title", "title"),
+    )
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Note id={self.id} title={self.title!r} user_id={self.user_id}>"
